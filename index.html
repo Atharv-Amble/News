@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Generator</title>
+    <style>
+        /* Background Styling */
+        body {
+            background: url('https://source.unsplash.com/1600x900/?news,media,technology') no-repeat center center/cover;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Card */
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Input Field */
+        input {
+            width: 85%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        input:focus {
+            transform: scale(1.05);
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 12px 15px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-generate { background: #28a745; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+        .btn-clear-result { background: #ffc107; color: black; }
+        .btn-copy { background: #007bff; color: white; }
+
+        .btn:hover {
+            transform: scale(1.08);
+            opacity: 0.9;
+        }
+
+        /* Result Box */
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            color: black;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>AI News Generator 📰</h2>
+        <input id="input" type="text" placeholder="Enter topic for news">
+        <br>
+        <button class="btn btn-generate" onclick="getNews()">Generate News</button>
+        <button class="btn btn-clear" onclick="clearInput()">Clear Input</button>
+        <button class="btn btn-clear-result" onclick="clearResult()">Clear Result</button>
+        <button class="btn btn-copy" onclick="copyNews()">Copy News</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const input = document.getElementById("input");
+
+        async function getNews() {
+            if (!input.value.trim()) {
+                alert("Please enter a topic!");
+                return;
+            }
+
+            const API_KEY = "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";
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + API_KEY,
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        {
+                            role: "user",
+                            content: "Generate news on topic " + input.value + " in div tag with css, no html or body tag",
+                        },
+                    ],
+                }),
+            });
+
+            const body = await response.json();
+            console.log(body);
+            const newDiv = document.createElement('div');
+            newDiv.innerHTML = body.choices[0].message.content;
+            document.getElementById('result').innerHTML = "";
+            document.getElementById('result').appendChild(newDiv);
+        }
+
+        function clearInput() {
+            input.value = "";
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = "";
+        }
+
+        function copyNews() {
+            const resultText = document.getElementById('result').innerText;
+            if (!resultText) {
+                alert("No news to copy!");
+                return;
+            }
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert("News copied to clipboard!");
+            });
+        }
+    </script>
+
+</body>
+</html>
